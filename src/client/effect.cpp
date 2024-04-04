@@ -46,13 +46,14 @@ void Effect::drawEffect(const Point& dest, float scaleFactor, bool animate, int 
         }
     }
 
-    int xPattern = offsetX % getNumPatternX();
-    if(xPattern < 0)
-        xPattern += getNumPatternX();
+    const int newOffsetX = m_position.x - g_map.getCentralPosition().x;
+    const int newOffsetY = m_position.y - g_map.getCentralPosition().y;
 
-    int yPattern = offsetY % getNumPatternY();
-    if(yPattern < 0)
-        yPattern += getNumPatternY();
+    int xPattern = unsigned(newOffsetX) % getNumPatternX();
+    xPattern = 1 - xPattern - getNumPatternX();
+    if (xPattern < 0) xPattern += getNumPatternX();
+
+    int yPattern = unsigned(newOffsetY) % getNumPatternY();
 
     rawGetThingType()->draw(dest, scaleFactor, 0, xPattern, yPattern, 0, animationPhase, lightView);
 }
