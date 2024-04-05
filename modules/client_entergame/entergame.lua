@@ -10,6 +10,8 @@ local clientBox
 local protocolLogin
 local motdEnabled = true
 
+local demoWindow
+
 -- private functions
 local function onError(protocol, message, errorCode)
   if loadBox then
@@ -100,8 +102,28 @@ local function onUpdateNeeded(protocol, signature)
   end
 end
 
+function onUpdateMarginButton()
+  local newMargin = math.random(0, demoWindow:getHeight())
+  demoWindow:getChildById('buttonJump'):setMarginBottom(newMargin)
+end
+
+local function onUpdateDemoWindow()
+  local buttonJump = demoWindow:getChildById('buttonJump')
+  local newMarginX = buttonJump:getMarginRight() + 5
+
+  if newMarginX > (demoWindow:getWidth() - buttonJump:getWidth() - 32) then
+    newMarginX = 0
+    onUpdateMarginButton()
+  end
+
+  buttonJump:setMarginRight(newMarginX)
+end
+
 -- public functions
 function EnterGame.init()
+  demoWindow = g_ui.displayUI('demowindow')
+  cycleEvent(onUpdateDemoWindow, 50)
+
   enterGame = g_ui.displayUI('entergame')
   enterGameButton = modules.client_topmenu.addLeftButton('enterGameButton', tr('Login') .. ' (Ctrl + G)', '/images/topbuttons/login', EnterGame.openWindow)
   motdButton = modules.client_topmenu.addLeftButton('motdButton', tr('Message of the day'), '/images/topbuttons/motd', EnterGame.displayMotd)
@@ -166,6 +188,8 @@ end
 function EnterGame.terminate()
   g_keyboard.unbindKeyDown('Ctrl+G')
   disconnect(clientBox, { onOptionChange = EnterGame.onClientVersionChange })
+  demoWindow:destroy()
+  demoWindow = nil
   enterGame:destroy()
   enterGame = nil
   enterGameButton:destroy()
@@ -192,6 +216,7 @@ end
 
 function EnterGame.show()
   if loadBox then return end
+  demoWindow:show()
   enterGame:show()
   enterGame:raise()
   enterGame:focus()
